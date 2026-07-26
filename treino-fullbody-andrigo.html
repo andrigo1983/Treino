@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0A1C29">
+<title>Quadra — Treino Full Body</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --court:#0A1C29;        /* piso da quadra, azul profundo */
+    --panel:#12303F;        /* área dos 6 metros */
+    --line:#E6EDF1;         /* linha de quadra, giz */
+    --led:#F5B301;          /* placar âmbar */
+    --zone:#3FA796;         /* zona de 9m, verde-água */
+    --mute:#7C95A3;
+    --alert:#E4572E;
+    --r:4px;
+    --pad:16px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--court);
+    color:var(--line);
+    font-family:'Barlow',system-ui,-apple-system,sans-serif;
+    font-size:16px;line-height:1.45;
+    padding-bottom:120px;
+    background-image:
+      linear-gradient(transparent 0 calc(100% - 1px), rgba(230,237,241,.045) 100%);
+    background-size:100% 96px;
+  }
+  h1,h2,h3,.disp{font-family:'Barlow Condensed','Barlow',sans-serif;text-transform:uppercase;letter-spacing:.04em;margin:0}
+  .mono{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+
+  /* ---------- PLACAR (assinatura) ---------- */
+  .placar{
+    position:sticky;top:0;z-index:40;
+    background:linear-gradient(180deg,#081722 0%,#0A1C29 100%);
+    border-bottom:2px solid var(--led);
+    padding:10px var(--pad) 0;
+    padding-top:calc(10px + env(safe-area-inset-top));
+  }
+  .placar-top{display:flex;align-items:baseline;gap:10px;justify-content:space-between}
+  .placar-id{font-size:13px;letter-spacing:.22em;color:var(--zone)}
+  .placar-week{font-size:12px;letter-spacing:.14em;color:var(--mute)}
+  .placar-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:2px 0 10px}
+  .stat{display:flex;flex-direction:column}
+  .stat.right{align-items:flex-end}
+  .stat b{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;line-height:1;color:var(--led);
+          text-shadow:0 0 18px rgba(245,179,1,.28)}
+  .stat span{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.2em;color:var(--mute);text-transform:uppercase;margin-top:5px}
+  .badge-day{
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:40px;line-height:1;
+    width:58px;height:58px;display:grid;place-items:center;color:var(--court);background:var(--line);
+    border-radius:2px;
+  }
+  /* barra de progresso = linha de quadra */
+  .bar{height:3px;background:rgba(230,237,241,.14);position:relative;overflow:hidden}
+  .bar i{position:absolute;inset:0 auto 0 0;background:var(--led);width:0;transition:width .28s ease}
+
+  /* ---------- ABAS ---------- */
+  .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(230,237,241,.12);border-bottom:1px solid rgba(230,237,241,.12)}
+  .tab{
+    appearance:none;border:0;background:var(--court);color:var(--mute);
+    font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.1em;
+    font-size:13px;font-weight:600;padding:11px 2px;cursor:pointer;line-height:1.25
+  }
+  .tab small{display:block;font-size:9.5px;letter-spacing:.1em;opacity:.75;font-weight:500}
+  .tab[aria-selected="true"]{background:var(--panel);color:var(--line);box-shadow:inset 0 -3px 0 var(--led)}
+
+  .wrap{padding:0 var(--pad)}
+  .sec-head{display:flex;align-items:center;gap:10px;margin:26px 0 12px}
+  .sec-head h2{font-size:15px;letter-spacing:.18em;color:var(--zone);font-weight:600}
+  .sec-head:after{content:"";flex:1;height:1px;background:rgba(230,237,241,.14)}
+
+  /* ---------- CARDS DE EXERCÍCIO ---------- */
+  .ex{
+    background:var(--panel);border-left:3px solid rgba(230,237,241,.16);
+    border-radius:0 var(--r) var(--r) 0;padding:13px 14px;margin-bottom:9px;
+    transition:border-color .2s,opacity .2s
+  }
+  .ex.done{border-left-color:var(--led);opacity:.5}
+  .ex-head{display:flex;gap:11px;align-items:flex-start}
+  .num{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mute);padding-top:3px;min-width:20px}
+  .ex h3{font-size:19px;font-weight:600;line-height:1.1}
+  .presc{font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:var(--led);margin-top:5px;letter-spacing:.01em}
+  .tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);font-family:'Barlow Condensed',sans-serif}
+  .cue{font-size:13.5px;color:#B7C7D1;margin-top:8px;padding-left:31px;line-height:1.4}
+  .row{display:flex;align-items:center;gap:8px;margin-top:11px;padding-left:31px;flex-wrap:wrap}
+  .chip{
+    width:38px;height:38px;border-radius:2px;border:1px solid rgba(230,237,241,.28);
+    background:transparent;color:var(--mute);font-family:'IBM Plex Mono',monospace;font-size:13px;
+    cursor:pointer;display:grid;place-items:center;padding:0
+  }
+  .chip.on{background:var(--led);border-color:var(--led);color:#081722;font-weight:600}
+  .load{
+    margin-left:auto;display:flex;align-items:center;gap:6px;
+    border-bottom:1px solid rgba(230,237,241,.24);padding-bottom:2px
+  }
+  .load input{
+    width:62px;background:transparent;border:0;color:var(--line);
+    font-family:'IBM Plex Mono',monospace;font-size:15px;text-align:right;padding:2px 0;outline:none
+  }
+  .load input::placeholder{color:rgba(124,149,163,.6)}
+  .load span{font-size:11px;color:var(--mute);font-family:'Barlow Condensed',sans-serif;letter-spacing:.1em}
+
+  /* ---------- BLOCOS ---------- */
+  details.block{background:rgba(18,48,63,.6);border:1px solid rgba(230,237,241,.1);border-radius:var(--r);padding:12px 14px;margin-bottom:9px}
+  details.block summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+    font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:14px;font-weight:600}
+  details.block summary::-webkit-details-marker{display:none}
+  details.block summary:after{content:"+";color:var(--led);font-family:'IBM Plex Mono',monospace;font-size:17px}
+  details.block[open] summary:after{content:"–"}
+  details.block ul{margin:11px 0 0;padding-left:17px;font-size:14px;color:#B7C7D1}
+  details.block li{margin-bottom:6px}
+  details.block li b{color:var(--line);font-weight:600}
+
+  .cardio{background:linear-gradient(135deg,#12303F 0%,#154457 100%);border:1px solid var(--zone);border-radius:var(--r);padding:15px}
+  .cardio h3{font-size:20px;color:var(--zone)}
+  .cardio .plan{font-size:14.5px;color:#CBDBE3;margin-top:9px}
+  .cardio .plan b{color:var(--line)}
+  .btn-cardio{
+    margin-top:13px;width:100%;padding:12px;background:var(--zone);color:#062028;border:0;border-radius:2px;
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:.14em;text-transform:uppercase;cursor:pointer
+  }
+
+  select{
+    background:var(--panel);color:var(--line);border:1px solid rgba(230,237,241,.22);border-radius:2px;
+    padding:7px 9px;font-family:'Barlow Condensed',sans-serif;font-size:14px;letter-spacing:.06em
+  }
+  .ghost{
+    background:transparent;border:1px solid rgba(230,237,241,.24);color:var(--mute);border-radius:2px;
+    padding:9px 14px;font-family:'Barlow Condensed',sans-serif;letter-spacing:.12em;text-transform:uppercase;font-size:12px;cursor:pointer
+  }
+  footer{padding:30px var(--pad) 40px;color:var(--mute);font-size:13px;line-height:1.55}
+  footer b{color:#B7C7D1}
+
+  /* ---------- CRONÔMETRO DE DESCANSO ---------- */
+  .rest{
+    position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:#081722;border-top:2px solid var(--led);
+    transform:translateY(110%);transition:transform .26s cubic-bezier(.2,.8,.3,1);
+    padding:14px var(--pad);padding-bottom:calc(14px + env(safe-area-inset-bottom));
+    display:flex;align-items:center;gap:14px
+  }
+  .rest.up{transform:translateY(0)}
+  .rest .clock{font-family:'IBM Plex Mono',monospace;font-size:42px;font-weight:600;color:var(--led);line-height:1;letter-spacing:-.02em}
+  .rest .clock.zero{color:var(--alert)}
+  .rest .lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:.2em;color:var(--mute);text-transform:uppercase}
+  .rest .acts{margin-left:auto;display:flex;gap:7px}
+  .rest button{
+    background:transparent;border:1px solid rgba(230,237,241,.3);color:var(--line);border-radius:2px;padding:10px 12px;
+    font-family:'Barlow Condensed',sans-serif;font-size:13px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer
+  }
+  :focus-visible{outline:2px solid var(--led);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  @media (min-width:620px){body{max-width:620px;margin:0 auto;border-left:1px solid rgba(230,237,241,.08);border-right:1px solid rgba(230,237,241,.08)}}
+</style>
+</head>
+<body>
+
+<header class="placar">
+  <div class="placar-top">
+    <span class="placar-id disp">Full Body · 4×/sem</span>
+    <span class="placar-week disp" id="phaseTag">Semana 1 — Reentrada</span>
+  </div>
+  <div class="placar-grid">
+    <div class="stat"><b class="mono" id="clock">00:00</b><span>Tempo de sessão</span></div>
+    <div class="badge-day disp" id="dayBadge">A</div>
+    <div class="stat right"><b class="mono" id="setsCount">0/26</b><span>Séries concluídas</span></div>
+  </div>
+  <div class="bar"><i id="bar"></i></div>
+</header>
+
+<nav class="tabs" id="tabs" role="tablist"></nav>
+
+<main class="wrap">
+  <div class="sec-head"><h2>Aquecimento · 8 min</h2></div>
+  <details class="block">
+    <summary>Protocolo fixo — todos os dias</summary>
+    <ul>
+      <li><b>4 min</b> bike ou esteira leve, subindo o ritmo aos poucos.</li>
+      <li><b>Mobilidade de quadril:</b> 10 agachamentos profundos sem carga + 8 afundos com rotação por lado.</li>
+      <li><b>Ombro (ex-handebolista, prioridade):</b> 15 rotações externas com elástico + 15 band pull-aparts por lado.</li>
+      <li><b>Tornozelo/joelho:</b> 15 elevações de panturrilha + 10 flexões de joelho na parede.</li>
+      <li><b>Série de aproximação:</b> no 1º exercício, faça 2 séries leves (50% e 70% da carga) antes de valer.</li>
+    </ul>
+  </details>
+
+  <div class="sec-head"><h2 id="focusTitle">Força geral</h2></div>
+  <div id="exList"></div>
+
+  <div class="sec-head"><h2>Aeróbico · 20 min</h2></div>
+  <div class="cardio">
+    <h3 class="disp" id="cardioName">Contínuo Z2</h3>
+    <div class="plan" id="cardioPlan"></div>
+    <button class="btn-cardio" id="startCardio">Iniciar 20 minutos</button>
+  </div>
+
+  <div class="sec-head"><h2>Ajustes</h2></div>
+  <div class="row" style="padding-left:0;gap:10px">
+    <select id="weekSel" aria-label="Semana do ciclo"></select>
+    <button class="ghost" id="resetDay">Zerar dia</button>
+  </div>
+
+  <details class="block" style="margin-top:20px">
+    <summary>Como progredir a carga</summary>
+    <ul>
+      <li><b>Regra 2+2:</b> quando você fechar o topo da faixa de repetições em <b>todas</b> as séries por 2 treinos seguidos, suba a carga.</li>
+      <li><b>Quanto subir:</b> +5 kg em agachamento, terra e leg press. +2,5 kg em supino, remada e desenvolvimento. +1 a 2 kg em isoladores.</li>
+      <li><b>RIR</b> = repetições que sobram no tanque. RIR 2 significa parar com 2 repetições de reserva.</li>
+      <li><b>Anote a carga</b> no campo de cada exercício. É o dado que decide o treino seguinte.</li>
+    </ul>
+  </details>
+
+  <details class="block">
+    <summary>Ciclo de 8 semanas</summary>
+    <ul>
+      <li><b>Semanas 1–2 · Reentrada:</b> RIR 3–4, cargas em torno de 65–70% do que você usava. Você vai terminar achando fácil. É proposital — 15 dias parado deixa o tendão atrás do músculo.</li>
+      <li><b>Semanas 3–5 · Construção:</b> RIR 2. Aplique a regra 2+2 toda semana.</li>
+      <li><b>Semanas 6–7 · Intensificação:</b> RIR 1 apenas na última série dos 3 primeiros exercícios do dia.</li>
+      <li><b>Semana 8 · Deload:</b> mantenha as cargas, corte as séries pela metade. Aeróbico só contínuo leve.</li>
+    </ul>
+  </details>
+</main>
+
+<footer>
+  <b>Volume da semana:</b> 4 sessões de corpo inteiro, cada músculo estimulado 4×. Isso funciona porque o volume por sessão é moderado — não acrescente séries "porque sobrou tempo".<br><br>
+  <b>Espaçamento:</b> deixe pelo menos 1 dia entre sessões. Padrão que funciona: seg / ter / qui / sáb, ou seg / qua / sex / sáb.<br><br>
+  <b>Você tem 42 anos e 30 de handebol nas costas.</b> Joelho e ombro carregam esse histórico. Dor articular aguda em qualquer movimento = troque o exercício no dia e procure avaliação. Antes de retomar carga pesada, uma liberação médica e uma avaliação com educador físico presencial valem o tempo.
+</footer>
+
+<div class="rest" id="rest" role="status" aria-live="polite">
+  <div>
+    <div class="lbl">Descanso</div>
+    <div class="clock mono" id="restClock">00:00</div>
+  </div>
+  <div class="acts">
+    <button id="rAdd">+30s</button>
+    <button id="rSkip">Pular</button>
+  </div>
+</div>
+
+<script>
+/* ============ ARMAZENAMENTO ============ */
+const mem = {};
+const store = {
+  async get(k){
+    try{ if(window.storage){ const r = await window.storage.get(k); return r? r.value : null; } }catch(e){}
+    try{ return localStorage.getItem(k); }catch(e){}
+    return mem[k] ?? null;
+  },
+  async set(k,v){
+    try{ if(window.storage){ await window.storage.set(k,v); return; } }catch(e){}
+    try{ localStorage.setItem(k,v); return; }catch(e){}
+    mem[k]=v;
+  }
+};
+const KEY='quadra:v1';
+let state={week:1,day:'A',data:{}};
+
+/* ============ PROGRAMA ============ */
+const PROG={
+A:{focus:'Força geral',sub:'Agachar · Empurrar',
+ cardio:{name:'Contínuo Z2',plan:'<b>5 min</b> caminhada 6 km/h para subir a frequência.<br><b>15 min</b> corrida contínua a <b>8 km/h</b>. Ritmo em que você consegue falar uma frase inteira sem ofegar. Se não consegue, baixe para 7,5.'},
+ ex:[
+ {n:'Agachamento livre',s:4,r:'6–8',rir:'RIR 2',d:150,tag:'Quadríceps · Glúteo',cue:'Com 1,92 m o tronco inclina mais — é normal. Barra alta, pés um pouco mais abertos, joelho seguindo a linha do dedo do meio.'},
+ {n:'Supino reto com barra',s:4,r:'6–8',rir:'RIR 2',d:120,tag:'Peito · Tríceps',cue:'Escápulas presas no banco, cotovelos a ~60° do tronco. Não desça buscando amplitude máxima: ombro de handebolista não gosta disso.'},
+ {n:'Remada curvada pronada',s:4,r:'8–10',rir:'RIR 2',d:105,tag:'Dorsal · Trapézio',cue:'Tronco a 45°, barra puxada para o umbigo. Se a lombar reclamar, troque por remada cavalinho.'},
+ {n:'Elevação de quadril',s:3,r:'10–12',rir:'RIR 2',d:105,tag:'Glúteo · Posterior',cue:'Queixo para o peito, segure 1 segundo no topo. Não hiperestenda a lombar para "subir mais".'},
+ {n:'Desenvolvimento halteres sentado',s:3,r:'8–10',rir:'RIR 2',d:105,tag:'Ombro',cue:'Banco a 80°, não 90°. Halteres param na altura da testa, não atrás da cabeça.'},
+ {n:'Face pull',s:3,r:'15',rir:'RIR 3',d:60,tag:'Manguito · Postura',cue:'Puxe a corda na altura dos olhos e gire as mãos para fora. É saúde de ombro, não é exercício de força.'},
+ {n:'Prancha frontal',s:3,r:'40 s',rir:'',d:60,tag:'Core',cue:'Glúteo contraído, costela para baixo. 40 segundos de qualidade valem mais que 2 minutos desabando.'}
+]},
+B:{focus:'Hipertrofia — superior',sub:'Puxar · Empurrar',
+ cardio:{name:'Intervalado curto',plan:'<b>4 min</b> caminhada de aquecimento.<br><b>6 séries:</b> 1 min a <b>10 km/h</b> + 1 min 30 caminhando a 6 km/h.<br><b>1 min</b> caminhada para desacelerar.'},
+ ex:[
+ {n:'Leg press 45°',s:4,r:'10–12',rir:'RIR 2',d:120,tag:'Quadríceps · Glúteo',cue:'Pés no meio da plataforma, na largura dos ombros. Desça até o quadril começar a sair do encosto e pare aí.'},
+ {n:'Supino inclinado com halteres',s:4,r:'10–12',rir:'RIR 2',d:105,tag:'Peito superior',cue:'Inclinação de 30°. Halteres permitem trajetória livre — melhor opção para seu ombro do que a barra inclinada.'},
+ {n:'Puxada frontal aberta',s:4,r:'10–12',rir:'RIR 2',d:105,tag:'Dorsal',cue:'Puxe com o cotovelo, não com a mão. Peito para cima, barra até o queixo.'},
+ {n:'Mesa flexora',s:3,r:'12–15',rir:'RIR 2',d:75,tag:'Posterior de coxa',cue:'Posterior forte é o seguro do seu joelho. Descida em 3 segundos.'},
+ {n:'Elevação lateral',s:4,r:'12–15',rir:'RIR 1',d:50,tag:'Deltoide médio',cue:'Braços longos = alavanca longa. Use carga menor do que o ego pede e suba só até a linha do ombro.'},
+ {n:'Rosca alternada',s:3,r:'10–12',rir:'RIR 1',d:60,tag:'Bíceps',cue:'Cotovelo colado no tronco. Sem balanço de quadril.'},
+ {n:'Tríceps na corda',s:3,r:'12–15',rir:'RIR 1',d:60,tag:'Tríceps',cue:'Abra a corda no final do movimento e segure meio segundo.'},
+ {n:'Prancha lateral',s:3,r:'30 s / lado',rir:'',d:50,tag:'Core lateral',cue:'Quadril alto e alinhado. Trabalha exatamente a estabilidade que a mudança de direção no handebol exigia.'}
+]},
+C:{focus:'Cadeia posterior',sub:'Dobradiça de quadril',
+ cardio:{name:'Caminhada inclinada',plan:'<b>20 min</b> na esteira a <b>5,5–6 km/h</b> com <b>8 a 10% de inclinação</b>.<br>Dia de terra romeno pede aeróbico sem impacto. Não segure no apoio — deixe os braços livres.'},
+ ex:[
+ {n:'Levantamento terra romeno',s:4,r:'8–10',rir:'RIR 2',d:150,tag:'Posterior · Glúteo · Lombar',cue:'Empurre o quadril para trás, barra raspando a coxa, joelho quase estendido. Desce até sentir o posterior alongar — em geral um pouco abaixo do joelho.'},
+ {n:'Afundo com halteres',s:3,r:'10 / perna',rir:'RIR 2',d:120,tag:'Unilateral',cue:'Passo mais longo puxa glúteo; passo curto puxa quádriceps. Comece parado, sem caminhar.'},
+ {n:'Remada unilateral com halter',s:4,r:'10',rir:'RIR 2',d:105,tag:'Dorsal',cue:'Apoio no banco, coluna neutra. Puxe o halter em direção ao bolso, não ao peito.'},
+ {n:'Supino reto com halteres',s:3,r:'10–12',rir:'RIR 2',d:105,tag:'Peito',cue:'Alternativa mais amigável ao ombro que a barra. Não bata os halteres no topo.'},
+ {n:'Barra fixa assistida ou pulldown neutro',s:3,r:'10–12',rir:'RIR 2',d:105,tag:'Dorsal · Bíceps',cue:'Pegada neutra. Se conseguir barra fixa livre, faça — mas mantenha a faixa de repetições.'},
+ {n:'Panturrilha em pé',s:4,r:'12–15',rir:'RIR 1',d:60,tag:'Panturrilha',cue:'Pausa de 2 segundos embaixo. Panturrilha forte é o que protege o tendão de Aquiles nas corridas.'},
+ {n:'Dead bug',s:3,r:'12 / lado',rir:'',d:50,tag:'Core anti-extensão',cue:'Lombar colada no chão o tempo todo. Se descolar, reduza a amplitude.'}
+]},
+D:{focus:'Atlético e metabólico',sub:'Volume leve · Estabilidade',
+ cardio:{name:'Progressivo',plan:'<b>7 min</b> a 7 km/h · <b>7 min</b> a 8,5 km/h · <b>5 min</b> a <b>10 km/h</b> · <b>1 min</b> caminhada.<br>Termine sentindo que ainda tinha mais 5 minutos no tanque.'},
+ ex:[
+ {n:'Agachamento goblet',s:3,r:'12–15',rir:'RIR 2',d:90,tag:'Quadríceps · Core',cue:'Halter no peito, descida controlada, tronco mais ereto. Ótimo para reeducar o padrão depois da parada.'},
+ {n:'Desenvolvimento militar em pé',s:3,r:'8–10',rir:'RIR 2',d:105,tag:'Ombro · Core',cue:'Glúteo e abdômen firmes. Se o ombro travar acima da cabeça, faça com halteres em pegada neutra.'},
+ {n:'Remada baixa pegada neutra',s:3,r:'12',rir:'RIR 2',d:75,tag:'Dorsal · Meio das costas',cue:'Junte as escápulas no final e segure 1 segundo.'},
+ {n:'Stiff com halteres',s:3,r:'12',rir:'RIR 2',d:75,tag:'Posterior',cue:'Versão mais leve do terra de quarta. Carga moderada, foco no alongamento.'},
+ {n:'Cadeira extensora',s:3,r:'15',rir:'RIR 1',d:60,tag:'Quadríceps · Joelho',cue:'Segure 1 segundo no topo. Reforço direto para o tendão patelar.'},
+ {n:'Rotação externa com elástico',s:3,r:'15 / lado',rir:'',d:45,tag:'Manguito rotador',cue:'Cotovelo colado no tronco, movimento lento. Inegociável no seu histórico de arremesso.'},
+ {n:'Farmer’s walk',s:3,r:'40 m',rir:'',d:75,tag:'Pegada · Core · Trapézio',cue:'Halteres pesados, ombro para trás, passos curtos. O exercício mais transferível para a vida real da lista.'},
+ {n:'Pallof press',s:3,r:'12 / lado',rir:'',d:45,tag:'Core anti-rotação',cue:'De lado para a polia, estenda os braços resistindo à rotação. Trabalha o que o arremesso pedia.'}
+]}
+};
+
+const PHASES={1:'Reentrada',2:'Reentrada',3:'Construção',4:'Construção',5:'Construção',6:'Intensificação',7:'Intensificação',8:'Deload'};
+
+/* ============ ELEMENTOS ============ */
+const $=id=>document.getElementById(id);
+const tabsEl=$('tabs'), listEl=$('exList');
+
+/* ============ RENDER ============ */
+function dayData(){
+  state.data[state.week]=state.data[state.week]||{};
+  state.data[state.week][state.day]=state.data[state.week][state.day]||{sets:{},load:{}};
+  return state.data[state.week][state.day];
+}
+
+function buildTabs(){
+  tabsEl.innerHTML='';
+  Object.keys(PROG).forEach(k=>{
+    const b=document.createElement('button');
+    b.className='tab'; b.setAttribute('role','tab');
+    b.setAttribute('aria-selected', k===state.day);
+    b.innerHTML='Treino '+k+'<small>'+PROG[k].sub+'</small>';
+    b.onclick=()=>{state.day=k;render();save();};
+    tabsEl.appendChild(b);
+  });
+}
+
+function render(){
+  const p=PROG[state.day], d=dayData();
+  $('dayBadge').textContent=state.day;
+  $('focusTitle').textContent=p.focus;
+  $('phaseTag').textContent='Semana '+state.week+' — '+PHASES[state.week];
+  $('cardioName').textContent=p.cardio.name;
+  $('cardioPlan').innerHTML=p.cardio.plan;
+  buildTabs();
+
+  listEl.innerHTML='';
+  p.ex.forEach((e,i)=>{
+    const done=d.sets[i]||0;
+    const card=document.createElement('div');
+    card.className='ex'+(done>=e.s?' done':'');
+    const chips=Array.from({length:e.s},(_,j)=>
+      `<button class="chip${j<done?' on':''}" data-ex="${i}" data-set="${j}" aria-label="Série ${j+1}">${j+1}</button>`).join('');
+    card.innerHTML=`
+      <div class="ex-head">
+        <div class="num">${String(i+1).padStart(2,'0')}</div>
+        <div style="flex:1">
+          <h3>${e.n}</h3>
+          <div class="presc">${e.s} × ${e.r}${e.rir?'  ·  '+e.rir:''}  ·  ${fmt(e.d)} descanso</div>
+          <div class="tag">${e.tag}</div>
+        </div>
+      </div>
+      <div class="cue">${e.cue}</div>
+      <div class="row">
+        ${chips}
+        <label class="load"><input type="number" inputmode="decimal" placeholder="—" data-load="${i}" value="${d.load[i]||''}" aria-label="Carga em kg"><span>kg</span></label>
+      </div>`;
+    listEl.appendChild(card);
+  });
+
+  listEl.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    const i=+c.dataset.ex, s=+c.dataset.set, cur=d.sets[i]||0;
+    d.sets[i] = (s+1===cur) ? s : s+1;
+    if(d.sets[i]>cur) startRest(PROG[state.day].ex[i].d);
+    render(); save();
+  });
+  listEl.querySelectorAll('input[data-load]').forEach(inp=>inp.onchange=()=>{
+    d.load[+inp.dataset.load]=inp.value; save();
+  });
+  updateScore();
+}
+
+function updateScore(){
+  const p=PROG[state.day], d=dayData();
+  const tot=p.ex.reduce((a,e)=>a+e.s,0);
+  const done=p.ex.reduce((a,e,i)=>a+Math.min(d.sets[i]||0,e.s),0);
+  $('setsCount').textContent=done+'/'+tot;
+  $('bar').style.width=(done/tot*100)+'%';
+}
+
+function fmt(s){const m=Math.floor(s/60),r=s%60;return m?(r?m+'min'+String(r).padStart(2,'0'):m+'min'):r+'s';}
+function mmss(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+
+/* ============ RELÓGIO DE SESSÃO ============ */
+let t0=null;
+setInterval(()=>{ if(t0) $('clock').textContent=mmss(Math.floor((Date.now()-t0)/1000)); },1000);
+
+/* ============ DESCANSO ============ */
+let rt=null,rleft=0;
+function beep(){
+  try{
+    const a=new (window.AudioContext||window.webkitAudioContext)();
+    const o=a.createOscillator(),g=a.createGain();
+    o.connect(g);g.connect(a.destination);o.frequency.value=880;
+    g.gain.setValueAtTime(.25,a.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.6);
+    o.start();o.stop(a.currentTime+.6);
+  }catch(e){}
+  if(navigator.vibrate) navigator.vibrate([180,90,180]);
+}
+function startRest(sec){
+  if(!t0) t0=Date.now();
+  rleft=sec; $('rest').classList.add('up'); tick();
+  clearInterval(rt);
+  rt=setInterval(()=>{
+    rleft--; tick();
+    if(rleft<=0){ clearInterval(rt); beep(); setTimeout(()=>$('rest').classList.remove('up'),2500); }
+  },1000);
+}
+function tick(){
+  const c=$('restClock');
+  c.textContent=mmss(Math.max(rleft,0));
+  c.classList.toggle('zero',rleft<=0);
+}
+$('rAdd').onclick=()=>{rleft+=30;tick();};
+$('rSkip').onclick=()=>{clearInterval(rt);$('rest').classList.remove('up');};
+$('startCardio').onclick=()=>{startRest(1200);};
+
+/* ============ CONTROLES ============ */
+const wk=$('weekSel');
+for(let i=1;i<=8;i++){const o=document.createElement('option');o.value=i;o.textContent='Semana '+i+' — '+PHASES[i];wk.appendChild(o);}
+wk.onchange=()=>{state.week=+wk.value;render();save();};
+$('resetDay').onclick=()=>{
+  if(confirm('Zerar as séries marcadas do Treino '+state.day+'? As cargas anotadas continuam salvas.')){
+    dayData().sets={}; render(); save();
+  }
+};
+
+/* ============ PERSISTÊNCIA ============ */
+let saveT=null;
+function save(){clearTimeout(saveT);saveT=setTimeout(()=>store.set(KEY,JSON.stringify(state)),350);}
+(async()=>{
+  const raw=await store.get(KEY);
+  if(raw){ try{ state=Object.assign(state,JSON.parse(raw)); }catch(e){} }
+  wk.value=state.week; render();
+})();
+</script>
+</body>
+</html>
