@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0B1A22">
+<title>Quadra — Classic Bodybuilder 4×60</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B1A22;
+    --bg-raised:#122733;
+    --bg-card:#0F212A;
+    --line:#1E3A45;
+    --ink:#EDE7DA;
+    --ink-dim:#9FB2B8;
+    --gold:#C9A24B;
+    --gold-dim:#8A7038;
+    --bronze:#8C6A45;
+    --red:#A3352B;
+    --green:#5E8C61;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #16303B 0%, transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding-bottom:48px;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:0 18px;}
+
+  /* ---------- header ---------- */
+  header.top{
+    padding:26px 18px 18px;
+    text-align:center;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg, rgba(201,162,75,0.06), transparent);
+  }
+  .brand{
+    font-family:'Bebas Neue',sans-serif;
+    letter-spacing:0.14em;
+    font-size:15px;
+    color:var(--gold);
+    text-transform:uppercase;
+  }
+  h1{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:38px;
+    letter-spacing:0.03em;
+    margin:4px 0 2px;
+    line-height:1;
+  }
+  .subtitle{
+    color:var(--ink-dim);
+    font-size:13.5px;
+    margin-top:4px;
+  }
+  .subtitle b{color:var(--ink);font-weight:600;}
+
+  /* ---------- day tabs ---------- */
+  .daytabs{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin:20px 0 14px;
+  }
+  .daytab{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:10px 4px 9px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+    user-select:none;
+  }
+  .daytab .dname{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:20px;
+    letter-spacing:.04em;
+    line-height:1;
+  }
+  .daytab .dtime{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--ink-dim);
+    margin-top:3px;
+    display:block;
+  }
+  .daytab.active{
+    border-color:var(--gold);
+    background:linear-gradient(180deg, rgba(201,162,75,0.14), rgba(201,162,75,0.03));
+  }
+  .daytab.active .dtime{color:var(--gold);}
+  .daytab.fixed .dtime{color:#C97B5E;}
+  .daytab.active.fixed .dtime{color:var(--gold);}
+
+  /* ---------- focus banner ---------- */
+  .focus{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+    margin-bottom:14px;
+  }
+  .focus .ftext .flabel{
+    font-size:10.5px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--gold-dim);
+    font-weight:700;
+  }
+  .focus .ftext .fname{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:22px;
+    letter-spacing:.02em;
+    margin-top:2px;
+  }
+  .focus .fmuscles{
+    text-align:right;
+    font-size:11px;
+    color:var(--ink-dim);
+    max-width:150px;
+    line-height:1.4;
+  }
+
+  /* ---------- stats row ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:16px;
+  }
+  .stat{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px;
+  }
+  .stat .slabel{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--ink-dim);
+  }
+  .stat .sval{
+    font-family:'JetBrains Mono',monospace;
+    font-size:26px;
+    font-weight:700;
+    margin-top:4px;
+    color:var(--ink);
+  }
+  .stat.timer .sval{color:var(--gold);}
+  .stat .shint{font-size:10px;color:var(--ink-dim);margin-top:2px;}
+
+  /* ---------- section titles ---------- */
+  .sectitle{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:18px;
+    letter-spacing:.06em;
+    color:var(--ink-dim);
+    margin:22px 0 10px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .sectitle::before{
+    content:'';
+    width:14px;height:2px;
+    background:var(--gold-dim);
+    display:inline-block;
+  }
+
+  /* ---------- warmup ---------- */
+  details.warmup{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:4px 16px;
+    margin-bottom:6px;
+  }
+  details.warmup summary{
+    cursor:pointer;
+    padding:12px 0;
+    font-weight:600;
+    font-size:14.5px;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  details.warmup summary::-webkit-details-marker{display:none;}
+  details.warmup summary::after{
+    content:'+';
+    color:var(--gold);
+    font-size:18px;
+  }
+  details.warmup[open] summary::after{content:'–';}
+  .warmup ul{
+    margin:0 0 14px;
+    padding-left:18px;
+    font-size:13.5px;
+    line-height:1.6;
+    color:var(--ink-dim);
+  }
+  .warmup ul li b{color:var(--ink);}
+
+  /* ---------- exercise card ---------- */
+  .exercise{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:14px 16px 16px;
+    margin-bottom:10px;
+  }
+  .ex-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .ex-name{
+    font-weight:700;
+    font-size:15.5px;
+    line-height:1.3;
+  }
+  .ex-meta{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    color:var(--gold);
+    white-space:nowrap;
+    padding-top:2px;
+  }
+  .ex-cue{
+    font-size:12.5px;
+    color:var(--ink-dim);
+    margin-top:5px;
+    line-height:1.45;
+  }
+  .ex-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-top:12px;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .sets-boxes{display:flex;gap:7px;}
+  .setbox{
+    width:30px;height:30px;
+    border-radius:8px;
+    border:1.5px solid var(--line);
+    background:transparent;
+    color:var(--ink-dim);
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    transition:all .12s;
+  }
+  .setbox.done{
+    background:var(--gold);
+    border-color:var(--gold);
+    color:#1B140A;
+    font-weight:700;
+  }
+  .loadfield{
+    display:flex;align-items:center;gap:6px;
+  }
+  .loadfield input{
+    width:56px;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:8px;
+    color:var(--ink);
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    padding:6px 6px;
+    text-align:center;
+  }
+  .loadfield input:focus{outline:none;border-color:var(--gold);}
+  .loadfield label{font-size:10.5px;color:var(--ink-dim);}
+
+  /* ---------- adjust / progression ---------- */
+  .card{
+    background:var(--bg-card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:16px;
+    margin-bottom:12px;
+  }
+  .card h3{
+    font-family:'Bebas Neue',sans-serif;
+    font-size:16px;
+    letter-spacing:.04em;
+    margin:0 0 8px;
+    color:var(--gold);
+  }
+  .card p, .card li{
+    font-size:13px;
+    line-height:1.55;
+    color:var(--ink-dim);
+    margin:0 0 6px;
+  }
+  .card b{color:var(--ink);}
+  .card ul{margin:0;padding-left:18px;}
+
+  .btnrow{display:flex;gap:10px;margin:16px 0 6px;}
+  button.action{
+    flex:1;
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:12px;
+    border-radius:12px;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  button.action.danger{color:#D98C7F;border-color:#5A3229;}
+  button.action:active{transform:scale(0.98);}
+
+  footer.note{
+    font-size:11.5px;
+    color:var(--ink-dim);
+    line-height:1.6;
+    padding:18px 4px 4px;
+    border-top:1px solid var(--line);
+    margin-top:20px;
+  }
+  footer.note b{color:var(--ink);}
+
+  /* ---------- rest overlay ---------- */
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(5,12,16,0.88);
+    display:flex;align-items:center;justify-content:center;
+    z-index:50;
+    opacity:0;pointer-events:none;
+    transition:opacity .18s;
+  }
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .rest-card{
+    background:var(--bg-raised);
+    border:1px solid var(--gold-dim);
+    border-radius:20px;
+    padding:32px 30px;
+    text-align:center;
+    width:min(300px,86vw);
+  }
+  .rest-card .rlabel{
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .rest-card .rtime{
+    font-family:'JetBrains Mono',monospace;
+    font-size:52px;
+    font-weight:700;
+    color:var(--gold);
+    margin:10px 0 4px;
+  }
+  .rest-card .rnext{
+    font-size:12.5px;
+    color:var(--ink-dim);
+    margin-bottom:18px;
+  }
+  .rest-btns{display:flex;gap:10px;}
+  .rest-btns button{
+    flex:1;
+    padding:11px;
+    border-radius:10px;
+    border:1px solid var(--line);
+    background:var(--bg-card);
+    color:var(--ink);
+    font-weight:600;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .rest-btns button.skip{color:var(--gold);border-color:var(--gold-dim);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">Quadra</div>
+  <h1>Classic Bodybuilder</h1>
+  <div class="subtitle">4×/semana · máx <b>60 min</b> por sessão · terça e quinta <b>22h–23h</b></div>
+</header>
+
+<div class="wrap">
+
+  <div class="daytabs" id="daytabs"></div>
+
+  <div class="focus" id="focus"></div>
+
+  <div class="stats">
+    <div class="stat timer">
+      <div class="slabel">Tempo de sessão</div>
+      <div class="sval" id="sessionTimer">00:00</div>
+      <div class="shint">Corte o próximo exercício se passar de 55:00</div>
+    </div>
+    <div class="stat">
+      <div class="slabel">Séries concluídas</div>
+      <div class="sval" id="setsCount">0/0</div>
+      <div class="shint" id="setsHint">Toque nos quadrados a cada série</div>
+    </div>
+  </div>
+
+  <details class="warmup">
+    <summary>Aquecimento · 5 min (protocolo fixo)</summary>
+    <ul>
+      <li><b>2 min</b> bike/esteira leve, subindo o ritmo aos poucos.</li>
+      <li><b>Ombro</b> (ex-handebolista, prioridade): 12 rotações externas com elástico + 10 band pull-aparts por lado.</li>
+      <li><b>Joelho/quadril</b>: 8 agachamentos livres sem carga + 6 afundos com rotação por lado.</li>
+      <li><b>Série de aproximação</b>: no 1º exercício do dia, 2 séries leves (50% e 70% da carga) antes de valer.</li>
+    </ul>
+  </details>
+
+  <div class="sectitle">Treino de hoje</div>
+  <div id="exercises"></div>
+
+  <div class="btnrow">
+    <button class="action" id="btnPause">Pausar cronômetro</button>
+    <button class="action danger" id="btnReset">Zerar dia</button>
+  </div>
+
+  <div class="sectitle">Foco: Classic Bodybuilder</div>
+  <div class="card">
+    <h3>O que muda para esse objetivo</h3>
+    <ul>
+      <li><b>Divisão superior/inferior</b> em vez de corpo inteiro: cada grupo muscular recebe mais volume por sessão, o que é o que constrói o visual "clássico" — peito cheio, costas em V, ombro redondo, braço definido, simetria entre os lados.</li>
+      <li><b>Faixa de repetição 8–15</b>, tempo controlado (2s na descida), foco em sentir o músculo trabalhar — não é sobre a carga máxima, é sobre volume de qualidade.</li>
+      <li><b>Sem bloco de aeróbico contínuo</b> dentro da sessão: sua janela é curta (1h), então o tempo vai inteiro para hipertrofia. Cardio, se quiser, fica para outro momento do dia.</li>
+      <li><b>Isoladores no fim de cada treino</b> (elevação lateral, rosca, tríceps, panturrilha) — é o que dá acabamento e simetria visual, o traço clássico do físico de bodybuilder.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Como progredir a carga</h3>
+    <ul>
+      <li><b>Regra 2+2:</b> quando fechar o topo da faixa de repetições em <b>todas</b> as séries por 2 treinos seguidos, suba a carga.</li>
+      <li><b>Quanto subir:</b> +5 kg em agachamento, terra romeno e hip thrust. +2,5 kg em supino, remada e desenvolvimento. +1–2 kg em isoladores.</li>
+      <li><b>RIR</b> = repetições que sobram no tanque. RIR 2 = parar com 2 de reserva.</li>
+      <li><b>Anote a carga</b> no campo de cada exercício — é o dado que decide o treino seguinte.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Ciclo de 8 semanas</h3>
+    <p><b>Semanas 1–2 · Reentrada:</b> RIR 3–4, cargas em ~65–70% do que você usava. Vai parecer fácil — é proposital.</p>
+    <p><b>Semanas 3–5 · Construção:</b> RIR 2. Aplique a regra 2+2 toda semana.</p>
+    <p><b>Semanas 6–7 · Intensificação:</b> RIR 1 só na última série dos 3 primeiros exercícios de cada dia.</p>
+    <p><b>Semana 8 · Deload:</b> mantenha as cargas, corte as séries pela metade.</p>
+  </div>
+
+  <div class="card">
+    <h3>Semana e horários</h3>
+    <p><b>Segunda</b> — Superior A (Peito &amp; Costas) — horário livre.</p>
+    <p><b>Terça, 22h–23h</b> — Inferior A (Quadríceps &amp; Core) — sessão fixa após a aula.</p>
+    <p><b>Quinta, 22h–23h</b> — Superior B (Ombro &amp; Braço) — sessão fixa após a aula.</p>
+    <p><b>Sábado</b> — Inferior B (Posterior &amp; Panturrilha) — horário livre.</p>
+    <p>Assim cada grupo muscular é treinado 2×/semana, com pelo menos 2 dias de descanso entre os treinos de mesmo padrão (superior/inferior).</p>
+  </div>
+
+  <footer class="note">
+    <b>Você tem 42 anos e ~30 de handebol nas costas.</b> Joelho e ombro carregam esse histórico. Dor articular aguda em qualquer movimento = troque o exercício no dia e procure avaliação. Nas sessões das 22h, priorize técnica sobre carga — é o fim de um dia longo de aula, o sistema nervoso já está cansado. Antes de retomar carga pesada, uma liberação médica e uma avaliação com educador físico presencial valem o tempo.
+  </footer>
+
+</div>
+
+<div class="overlay" id="restOverlay">
+  <div class="rest-card">
+    <div class="rlabel">Descanso</div>
+    <div class="rtime" id="restTime">01:30</div>
+    <div class="rnext" id="restNext">Próxima: —</div>
+    <div class="rest-btns">
+      <button id="restAdd">+30s</button>
+      <button class="skip" id="restSkip">Pular</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const PROGRAM = {
+  seg: {
+    label:'Segunda', short:'SEG', time:'Livre', fixed:false,
+    focus:'Superior A', focusFull:'Peito & Costas (espessura)',
+    muscles:'Peitoral, dorsal, romboide, ombro (saúde)',
+    exercises:[
+      {name:'Supino reto (barra ou halteres)', sets:4, reps:'8–10', rest:120, cue:'Compound principal do dia. 2 séries de aproximação antes de valer.'},
+      {name:'Puxada frente (pulldown)', sets:4, reps:'10–12', rest:90, cue:'Puxe com os cotovelos, não com as mãos — foco no dorsal.'},
+      {name:'Supino inclinado (halteres)', sets:3, reps:'10–12', rest:90, cue:'Inclinação 30°. Controle os 2s de descida.'},
+      {name:'Remada curvada ou máquina', sets:3, reps:'10–12', rest:90, cue:'Cotovelos próximos ao corpo, aperte a escápula no topo.'},
+      {name:'Crucifixo (halteres ou peck deck)', sets:3, reps:'12–15', rest:75, cue:'Amplitude confortável — sem forçar o ombro no ponto final.'},
+      {name:'Face pull', sets:3, reps:'15', rest:60, cue:'Prioridade dado o histórico de ombro — não pule este.'}
+    ]
+  },
+  ter: {
+    label:'Terça', short:'TER', time:'22h–23h', fixed:true,
+    focus:'Inferior A', focusFull:'Quadríceps & Core',
+    muscles:'Quadríceps, glúteo, core',
+    exercises:[
+      {name:'Agachamento (livre ou leg press)', sets:4, reps:'8–10', rest:120, cue:'Controle a profundidade pelo joelho — pare onde for confortável.'},
+      {name:'Cadeira extensora', sets:3, reps:'12–15', rest:75, cue:'Última série até RIR 1 se a semana pedir.'},
+      {name:'Afundo (halteres)', sets:3, reps:'10 cada perna', rest:90, cue:'Passo curto, joelho alinhado com o pé.'},
+      {name:'Cadeira flexora', sets:3, reps:'12', rest:75, cue:'Contração completa, sem impulso.'},
+      {name:'Panturrilha em pé', sets:4, reps:'15', rest:45, cue:'Amplitude completa, pausa de 1s no topo.'},
+      {name:'Prancha abdominal', sets:3, reps:'40s', rest:45, cue:'Quadril neutro, sem deixar cair a lombar.'}
+    ]
+  },
+  qui: {
+    label:'Quinta', short:'QUI', time:'22h–23h', fixed:true,
+    focus:'Superior B', focusFull:'Ombro & Braço',
+    muscles:'Deltoide, bíceps, tríceps, dorsal',
+    exercises:[
+      {name:'Desenvolvimento (halteres ou máquina)', sets:4, reps:'8–10', rest:120, cue:'Sem hiperextender a lombar — core firme.'},
+      {name:'Remada unilateral (serrote)', sets:4, reps:'10–12', rest:90, cue:'Puxe pelo cotovelo, gire o tronco o mínimo possível.'},
+      {name:'Elevação lateral', sets:3, reps:'12–15', rest:60, cue:'Cotovelo levemente flexionado, sobe até a linha do ombro.'},
+      {name:'Rosca direta (barra ou halteres)', sets:3, reps:'10–12', rest:75, cue:'Cotovelo fixo ao lado do corpo.'},
+      {name:'Tríceps corda ou francesa', sets:3, reps:'10–12', rest:75, cue:'Extensão completa sem travar o cotovelo com força.'},
+      {name:'Rosca alternada ou martelo', sets:2, reps:'12', rest:60, cue:'Finalizador — pode ser feito em bi-set com o tríceps.'}
+    ]
+  },
+  sab: {
+    label:'Sábado', short:'SÁB', time:'Livre', fixed:false,
+    focus:'Inferior B', focusFull:'Posterior & Panturrilha',
+    muscles:'Posterior de coxa, glúteo, panturrilha, core',
+    exercises:[
+      {name:'Levantamento terra romeno (RDL)', sets:4, reps:'8–10', rest:120, cue:'Cautela lombar/joelho — quadril para trás, barra colada na perna.'},
+      {name:'Cadeira flexora ou stiff', sets:3, reps:'12', rest:75, cue:'Contração no topo, descida controlada.'},
+      {name:'Hip thrust / elevação pélvica', sets:4, reps:'10–12', rest:90, cue:'Aperte o glúteo no topo por 1s.'},
+      {name:'Avanço reverso', sets:3, reps:'10 cada perna', rest:90, cue:'Passo para trás, joelho não bate no chão com força.'},
+      {name:'Panturrilha sentado', sets:4, reps:'15', rest:45, cue:'Amplitude completa, foco na fase excêntrica.'},
+      {name:'Prancha lateral ou elevação de pernas', sets:3, reps:'12–15', rest:45, cue:'Fecha o dia — core sem pressa.'}
+    ]
+  }
+};
+
+const DAY_ORDER = ['seg','ter','qui','sab'];
+
+let state = {
+  day: null,
+  done: {},       // {exIndex: [bool,...]}
+  loads: {},      // {exIndex: 'value'}
+  seconds: 0,
+  running: true,
+  timerHandle: null,
+  restHandle: null
+};
+
+function pad(n){return n.toString().padStart(2,'0');}
+function fmt(sec){return pad(Math.floor(sec/60))+':'+pad(sec%60);}
+
+function defaultDayForToday(){
+  const jsDay = new Date().getDay(); // 0=Sun..6=Sat
+  const map = {1:'seg', 2:'ter', 4:'qui', 6:'sab'};
+  return map[jsDay] || 'seg';
+}
+
+function initDayState(dayKey){
+  const prog = PROGRAM[dayKey];
+  state.done = {};
+  state.loads = {};
+  prog.exercises.forEach((ex,i)=>{
+    state.done[i] = new Array(ex.sets).fill(false);
+    state.loads[i] = '';
+  });
+}
+
+function renderTabs(){
+  const el = document.getElementById('daytabs');
+  el.innerHTML = '';
+  DAY_ORDER.forEach(key=>{
+    const d = PROGRAM[key];
+    const div = document.createElement('div');
+    div.className = 'daytab' + (key===state.day?' active':'') + (d.fixed?' fixed':'');
+    div.innerHTML = `<span class="dname">${d.short}</span><span class="dtime">${d.time}</span>`;
+    div.onclick = ()=> switchDay(key);
+    el.appendChild(div);
+  });
+}
+
+function renderFocus(){
+  const d = PROGRAM[state.day];
+  document.getElementById('focus').innerHTML = `
+    <div class="ftext">
+      <div class="flabel">${d.label} · ${d.time}</div>
+      <div class="fname">${d.focus} — ${d.focusFull}</div>
+    </div>
+    <div class="fmuscles">${d.muscles}</div>
+  `;
+}
+
+function renderExercises(){
+  const d = PROGRAM[state.day];
+  const el = document.getElementById('exercises');
+  el.innerHTML = '';
+  d.exercises.forEach((ex,i)=>{
+    const card = document.createElement('div');
+    card.className = 'exercise';
+    let boxes = '';
+    for(let s=0;s<ex.sets;s++){
+      const isDone = state.done[i][s];
+      boxes += `<div class="setbox${isDone?' done':''}" data-ex="${i}" data-set="${s}">${isDone?'✓':s+1}</div>`;
+    }
+    card.innerHTML = `
+      <div class="ex-head">
+        <div class="ex-name">${ex.name}</div>
+        <div class="ex-meta">${ex.sets}×${ex.reps}</div>
+      </div>
+      <div class="ex-cue">${ex.cue}</div>
+      <div class="ex-row">
+        <div class="sets-boxes">${boxes}</div>
+        <div class="loadfield">
+          <label>carga</label>
+          <input type="text" inputmode="decimal" placeholder="kg" data-load="${i}" value="${state.loads[i]}">
+        </div>
+      </div>
+    `;
+    el.appendChild(card);
+  });
+
+  el.querySelectorAll('.setbox').forEach(box=>{
+    box.addEventListener('click', ()=>{
+      const exI = parseInt(box.dataset.ex);
+      const setI = parseInt(box.dataset.set);
+      const wasDone = state.done[exI][setI];
+      state.done[exI][setI] = !wasDone;
+      updateSetsCount();
+      renderExercises();
+      if(!wasDone){
+        const ex = PROGRAM[state.day].exercises[exI];
+        const nextLabel = nextSetLabel(exI, setI);
+        startRest(ex.rest, nextLabel);
+      }
+    });
+  });
+
+  el.querySelectorAll('[data-load]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      state.loads[inp.dataset.load] = inp.value;
+    });
+  });
+
+  updateSetsCount();
+}
+
+function nextSetLabel(exI, setI){
+  const d = PROGRAM[state.day];
+  const ex = d.exercises[exI];
+  if(setI+1 < ex.sets){
+    return `${ex.name} — série ${setI+2}/${ex.sets}`;
+  }
+  if(exI+1 < d.exercises.length){
+    return d.exercises[exI+1].name;
+  }
+  return 'Fim do treino — alongar e concluir';
+}
+
+function updateSetsCount(){
+  const d = PROGRAM[state.day];
+  let total=0, done=0;
+  d.exercises.forEach((ex,i)=>{
+    total += ex.sets;
+    done += state.done[i].filter(Boolean).length;
+  });
+  document.getElementById('setsCount').textContent = `${done}/${total}`;
+  const hint = document.getElementById('setsHint');
+  hint.textContent = done===total ? 'Treino completo — bom trabalho.' : 'Toque nos quadrados a cada série';
+}
+
+function switchDay(key){
+  state.day = key;
+  initDayState(key);
+  resetTimer();
+  renderTabs();
+  renderFocus();
+  renderExercises();
+}
+
+/* ---------------- session timer ---------------- */
+function tickTimer(){
+  if(!state.running) return;
+  state.seconds++;
+  document.getElementById('sessionTimer').textContent = fmt(state.seconds);
+}
+function resetTimer(){
+  state.seconds = 0;
+  state.running = true;
+  document.getElementById('sessionTimer').textContent = '00:00';
+  document.getElementById('btnPause').textContent = 'Pausar cronômetro';
+}
+
+document.getElementById('btnPause').addEventListener('click', ()=>{
+  state.running = !state.running;
+  document.getElementById('btnPause').textContent = state.running ? 'Pausar cronômetro' : 'Retomar cronômetro';
+});
+
+document.getElementById('btnReset').addEventListener('click', ()=>{
+  initDayState(state.day);
+  resetTimer();
+  renderExercises();
+});
+
+/* ---------------- rest overlay ---------------- */
+let restRemaining = 0;
+function startRest(seconds, nextLabel){
+  clearInterval(state.restHandle);
+  restRemaining = seconds;
+  document.getElementById('restTime').textContent = fmt(restRemaining);
+  document.getElementById('restNext').textContent = 'Próxima: ' + nextLabel;
+  document.getElementById('restOverlay').classList.add('show');
+  state.restHandle = setInterval(()=>{
+    restRemaining--;
+    if(restRemaining <= 0){
+      hideRest();
+      return;
+    }
+    document.getElementById('restTime').textContent = fmt(restRemaining);
+  }, 1000);
+}
+function hideRest(){
+  clearInterval(state.restHandle);
+  document.getElementById('restOverlay').classList.remove('show');
+}
+document.getElementById('restAdd').addEventListener('click', ()=>{
+  restRemaining += 30;
+  document.getElementById('restTime').textContent = fmt(restRemaining);
+});
+document.getElementById('restSkip').addEventListener('click', hideRest);
+
+/* ---------------- boot ---------------- */
+state.day = defaultDayForToday();
+initDayState(state.day);
+renderTabs();
+renderFocus();
+renderExercises();
+setInterval(tickTimer, 1000);
+</script>
+</body>
+</html>
