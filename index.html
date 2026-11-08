@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#0c1425" />
+  <meta name="description" content="Meu ciclo de 8 semanas de treinos Classic Physique, com registro de cargas e evolução offline." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Classic 8" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./styles.css" />
+  <title>Classic 8 | Diário de treino</title>
+  <script src="./config.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
+  <script src="./app.js" defer></script>
+  <script src="./cloud.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="Classic 8, início">
+        <span class="logo-mark">C<span>8</span></span>
+        <span class="brand-copy"><b>CLASSIC 8</b><small>MEU DIÁRIO DE EVOLUÇÃO</small></span>
+      </a>
+      <span class="offline-pill" id="connection"><span class="pulse-dot"></span><span>Local</span></span>
+    </header>
+
+    <main id="app" aria-live="polite"></main>
+
+    <nav class="bottom-nav" aria-label="Navegação principal">
+      <button data-tab="inicio" class="nav-item active" aria-label="Início"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10H3zM9 20v-7h6v7"/></svg><span>Início</span></button>
+      <button data-tab="treinos" class="nav-item" aria-label="Treinos"><svg viewBox="0 0 24 24"><path d="M6 9v6M3 8v8M18 9v6M21 8v8M6 12h12"/></svg><span>Treinos</span></button>
+      <button data-tab="evolucao" class="nav-item" aria-label="Evolução"><svg viewBox="0 0 24 24"><path d="M3 19h18M5 15l5-5 4 3 5-8"/></svg><span>Evolução</span></button>
+      <button data-tab="dados" class="nav-item" aria-label="Dados e backup"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg><span>Dados</span></button>
+    </nav>
+  </div>
+  <div class="toast" role="status" id="toast"></div>
+  <input id="import-file" type="file" accept="application/json,.json" hidden />
+</body>
+</html>
