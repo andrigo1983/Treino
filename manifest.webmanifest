@@ -1,8 +1,8 @@
 {
   "id": "./",
-  "name": "Classic 8 — Diário de Treino",
+  "name": "Classic 8 Contínuo — Diário de Treino",
   "short_name": "Classic 8",
-  "description": "Treinos Classic Physique e evolução de 8 semanas, com banco de dados PostgreSQL, sincronização e uso offline.",
+  "description": "Agenda semanal flexível, sem início ou fim de ciclo, com histórico, PWA offline e sincronização opcional Supabase.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -10,7 +10,17 @@
   "theme_color": "#0c1425",
   "lang": "pt-BR",
   "icons": [
-    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
